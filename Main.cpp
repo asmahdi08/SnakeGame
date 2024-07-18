@@ -6,9 +6,9 @@ int main()
 {
     Timer timer;
     string Map = get_file_content("Map.txt");
-    int head_position = find_head_position(Map);
     int map_height = calculate_map_height(Map);
     int map_width = calculate_map_width(Map);
+    int head_position = find_head_position(Map);
     int lives = 1;
     int fruit_position = Map.find('*');
     int score = 0;
@@ -20,6 +20,7 @@ int main()
     char old_ch;
     float aux = 0;
     int wall_position;
+    int time_position = Map.find("%");
     system("cls");
     print(Map);
     old_head_position = head_position;
@@ -110,7 +111,7 @@ int main()
         Sleep(difficulty);
         timer.stop();
         aux = aux + timer.elapsedMilliseconds();
-        printf("%0.1f\n",aux/1000.0);
+        printf("%0.1f\n", aux / 1000.0);
 
         //print_score(map_height, score, lives);
     }
