@@ -1,3 +1,5 @@
+#include "head.h"
+
 // g++ -std=c++11 head.h Source.cpp Main.cpp -o m
 
 int main()
