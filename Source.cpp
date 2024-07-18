@@ -9,6 +9,7 @@ void gotoxy(short x, short y)
 
 string get_file_content(const string path)
 {
+
     ifstream file("Map.txt"); 
     string content((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
 
@@ -37,50 +38,62 @@ int calculate_head_height(int head_position, int map_width)
     return head_position / map_width;
 }
 
-int draw_left(string &map, int &spaceship_position, int map_height, int map_width)
+int draw_left(string &map, int &head_position, int map_width, int wall_position)
 {
-    if (spaceship_position % map_width > 1)
+
+    if (head_position % map_width > 1 && head_position - 1 != wall_position)
     {
-        map.replace(spaceship_position - 1, 2, "0 "); //Paramters: Position, Size, Content
-        spaceship_position--;
+        map.replace(head_position - 1, 2, "0 "); //Paramters: Position, Size, Content
+        head_position--;
     }
 
-    return spaceship_position;
+    return head_position;
 }
 
-int draw_right(string &map, int &spaceship_position, int map_height, int map_width)
+int draw_right(string &map, int &head_position, int map_width, int wall_position)
 {
-    if (spaceship_position % map_width < 23)
+    if (head_position % map_width < map_width - 3 && head_position + 1 != wall_position) // 3 por causa das duas paredes '#' e do \n
     {
-        map.replace(spaceship_position, 2, " 0"); //Paramters: Position, Size, Content
-        spaceship_position++;
+        map.replace(head_position, 2, " 0"); //Paramters: Position, Size, Content
+        head_position++;
     }
 
-    return spaceship_position;
+    return head_position;
 }
 
-int draw_up(string &map, int &spaceship_position, int map_height, int map_width)
+int draw_up(string &map, int &head_position, int map_width, int wall_position)
 {
-    if (spaceship_position / map_width > 1)
+    if (head_position / map_width > 1 && head_position - map_width != wall_position)
     {
-        map.replace(spaceship_position, 1, " "); //Paramters: Position, Size, Content
-        spaceship_position = spaceship_position - map_width;
-        map.replace(spaceship_position, 1, "0"); //Paramters: Position, Size, Content
+        map.replace(head_position, 1, " "); //Paramters: Position, Size, Content
+        head_position = head_position - map_width;
+        map.replace(head_position, 1, "0"); //Paramters: Position, Size, Content
     }
-    return spaceship_position;
+    return head_position;
 }
-int draw_down(string &map, int &spaceship_position, int map_height, int map_width)
+int draw_down(string &map, int &head_position, int map_height, int map_width, int wall_position)
 {
-    if (spaceship_position < (map_height - 2) * map_width)
+    if (head_position < (map_height - 2) * map_width && head_position + map_width != wall_position)
     {
-        map.replace(spaceship_position, 1, " "); //Paramters: Position, Size, Content
-        spaceship_position = spaceship_position + map_width;
-        map.replace(spaceship_position, 1, "0"); //Paramters: Position, Size, Content
+        map.replace(head_position, 1, " "); //Paramters: Position, Size, Content
+        head_position = head_position + map_width;
+        map.replace(head_position, 1, "0"); //Paramters: Position, Size, Content
     }
-    return spaceship_position;
+    return head_position;
 }
 
-tuple<int,bool> detect_shock(string map, int head_position, int head_last_position, int &lives, int map_width, char key_pressed)
+int detect_wall(string map, int head_position, int map_width, char key_pressed)
+{
+    int wall_position = 0;
+    int head_lock_ahead = calculate_next_head_position(head_position, map_width, key_pressed);
+    if (map.at(head_lock_ahead) == '#')
+    {
+        wall_position = head_lock_ahead;
+    }
+    return wall_position;
+}
+
+tuple<int, bool> detect_shock(string map, int head_position, int head_last_position, int &lives, int map_width, char key_pressed, int wall_position)
 {
     bool head_hit_wall = false;
     int head_lock_ahead = calculate_next_head_position(head_position, map_width, key_pressed);
@@ -94,11 +107,23 @@ tuple<int,bool> detect_shock(string map, int head_position, int head_last_positi
         head_hit_wall = true;
         lives--;
     }
+    /* else if (map.at(head_lock_ahead) == '#')
+    {
+        aux = head_lock_ahead;
+        //head_hit_wall = true;
+        //lives--;
+    }*/
 
-    return make_tuple(lives, head_hit_wall) ;
+    if (head_position == wall_position)
+    {
+        head_hit_wall = true;
+        lives--;
+    }
+
+    return make_tuple(lives, head_hit_wall);
 }
 
-int calculate_next_head_position(int spaceship_position, int map_width, char key_pressed)
+int calculate_next_head_position(int head_position, int map_width, char key_pressed)
 {
 
     int head_next_position;
@@ -106,16 +131,16 @@ int calculate_next_head_position(int spaceship_position, int map_width, char key
     switch (key_pressed)
     {
     case 'W':
-        head_next_position = spaceship_position - map_width;
+        head_next_position = head_position - map_width;
         break;
     case 'A':
-        head_next_position = spaceship_position - 1;
+        head_next_position = head_position - 1;
         break;
     case 'S':
-        head_next_position = spaceship_position + map_width;
+        head_next_position = head_position + map_width;
         break;
     case 'D':
-        head_next_position = spaceship_position + 1;
+        head_next_position = head_position + 1;
         break;
 
     default:
@@ -127,11 +152,12 @@ int calculate_next_head_position(int spaceship_position, int map_width, char key
 
 int draw_fruit_position(string &map)
 {
-    srand(time(NULL));
-    int fruit_position = rand() % map.length();
+    auto seed = chrono::high_resolution_clock::now().time_since_epoch().count();
+    mt19937 mt_rand(seed);
+    int fruit_position = mt_rand() % map.length();
 
     while (map.at(fruit_position) != ' ')
-        fruit_position = rand() % map.length();
+        fruit_position = mt_rand() % map.length();
 
     map.replace(fruit_position, 1, "*"); //Paramters: Position, Size, Content
 
@@ -181,4 +207,12 @@ void print(string txt)
 {
     gotoxy(0, 0);
     cout << txt << endl;
+}
+
+void print_score(int map_height, int score, int lives)
+{
+    gotoxy(1, map_height + 2);
+    cout << "Score: " << score << endl;
+    gotoxy(1, map_height + 3);
+    cout << "Lives: " << lives << endl;
 }
