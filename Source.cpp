@@ -1,5 +1,20 @@
 #include "head.h"
 
+System::System(/* args */)
+{
+}
+
+System::~System()
+{
+}
+
+int System::generate_ramdom_number()
+{
+    auto seed = chrono::high_resolution_clock::now().time_since_epoch().count();
+    mt19937 mt_rand(seed);
+    return mt_rand();
+}
+
 void Timer::start()
 {
     m_StartTime = std::chrono::system_clock::now();
@@ -42,17 +57,17 @@ string Map::get_file_content(const string path)
 
 int Map::calculate_width()
 {
-    return (map.find('\n') + 1);
+    return (canvas.find('\n') + 1);
 }
 
 int Map::calculate_height()
 {
-    return (map.size() / width) + 1;
+    return (canvas.size() / width) + 1;
 }
 
 Map::Map()
 {
-    this->map = get_file_content("Map.txt");
+    this->canvas = get_file_content("Map.txt");
     this->width = calculate_width();
     this->height = calculate_height();
 }
@@ -60,18 +75,18 @@ Map::Map()
 void Map::print()
 {
     gotoxy(0, 0);
-    cout << map << endl;
+    cout << canvas << endl;
 }
 
 int Head::find_position()
 {
-    return this->map.find('0');
+    return this->canvas.find('0');
 }
 int Head::detect_wall(char key_pressed)
 {
     int wall_position = 0;
     int head_lock_ahead = calculate_next_position(key_pressed);
-    if (this->map.at(head_lock_ahead) == '#')
+    if (this->canvas.at(head_lock_ahead) == '#')
     {
         wall_position = head_lock_ahead;
     }
@@ -82,7 +97,7 @@ bool Head::detect_shock(char key_pressed)
 {
     bool head_hit_wall = false;
     int head_lock_ahead = calculate_next_position(key_pressed);
-    if (this->map.at(head_lock_ahead) == 'o')
+    if (this->canvas.at(head_lock_ahead) == 'o')
         head_hit_wall = false;
     else if (this->head_position == this->head_last_position)
         head_hit_wall = true;
@@ -259,30 +274,45 @@ void print_score(int map_height, int score, int lives)
     cout << "Lives: " << lives << endl;
 }
 
-
-Fruit::Fruit(){
-    this->fruit_position = find_position();
+Fruit::Fruit()
+{
+    this->fruit_position = find_position(canvas);
 }
 
-int Fruit::find_position(){
-    return this->map.find('*');
-}
- int Fruit::get_position(){
-     return this->fruit_position;
- }
+int Fruit::find_position(string& map)
+{
+    int fruit_position = this->canvas.find('*');
 
+    if (this->canvas.find('*') == string::npos)
+    {
+        System sys;
+
+        fruit_position = sys.generate_ramdom_number() % this->canvas.length();
+
+        while (canvas.at(fruit_position) != ' ')
+            fruit_position = sys.generate_ramdom_number() % this->canvas.length();
+
+        map.replace(fruit_position, 1, "*"); //Paramters: Position, Size, Content
+
+    }
+
+    return fruit_position;
+}
+int Fruit::get_position()
+{
+    return this->fruit_position;
+}
 
 void Fruit::draw(string &map)
 {
-    auto seed = chrono::high_resolution_clock::now().time_since_epoch().count();
-    mt19937 mt_rand(seed);
-    int fruit_position = mt_rand() % map.length();
+    System sys;
+
+    int fruit_position = sys.generate_ramdom_number() % map.length();
 
     while (map.at(fruit_position) != ' ')
-        fruit_position = mt_rand() % map.length();
+        fruit_position = sys.generate_ramdom_number() % map.length();
 
     map.replace(fruit_position, 1, "*"); //Paramters: Position, Size, Content
 
     this->fruit_position = fruit_position;
 }
-
