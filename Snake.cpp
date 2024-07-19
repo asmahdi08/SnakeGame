@@ -7,9 +7,6 @@ Head::Head()
     this->head_last_position = this->head_position;
 }
 
-
-
-
 int Head::calculate_next_position(char key_pressed)
 {
     const int width = Map::get_width();
@@ -38,18 +35,9 @@ int Head::calculate_next_position(char key_pressed)
     return head_next_position;
 }
 
-
-
-void Snake::mtr(int v){
-    Map::canvas.replace(v, 1, "9"); 
-}
-
-
-
-
-bool Head::hit(){
-    return this->wall_shock;
-
+void Snake::mtr(int v)
+{
+    Map::canvas.replace(v, 1, "9");
 }
 
 int Head::find_position()
@@ -79,9 +67,6 @@ int Head::detect_tail(char key_pressed)
     return tail_position;
 }
 
-
-
-
 bool Head::detect_shock(char key_pressed)
 {
     bool head_hit_tail = false;
@@ -95,26 +80,23 @@ bool Head::detect_shock(char key_pressed)
         }
     }*/
 
-    if (this->head_position == this->tail_position){
+    if (this->head_position == this->tail_position)
+    {
         head_hit_tail = true;
-        
     }
-        
+
     else if (this->head_position == this->head_last_position)
         head_hit_wall = true;
     if (this->head_position == this->wall_position)
         head_hit_wall = true;
 
-    return head_hit_wall||head_hit_tail;
+    return head_hit_wall || head_hit_tail;
 }
-
-
-
-
 
 void Head::draw_left()
 {
     const int width = Map::get_width();
+
     if (head_position % width > 1 && head_position - 1 != wall_position)
     {
         Map::canvas.replace(head_position - 1, 2, "0 "); //Paramters: Position, Size, Content
@@ -125,6 +107,7 @@ void Head::draw_left()
 void Head::draw_right()
 {
     const int width = Map::get_width();
+
     if (head_position % width < width - 3 && head_position + 1 != wall_position) // 3 por causa das duas paredes '#' e do \n
     {
         Map::canvas.replace(head_position, 2, " 0"); //Paramters: Position, Size, Content
@@ -135,6 +118,7 @@ void Head::draw_right()
 void Head::draw_up()
 {
     const int width = Map::get_width();
+
     if (head_position / width > 1 && head_position - width != wall_position)
     {
         Map::canvas.replace(head_position, 1, " "); //Paramters: Position, Size, Content
@@ -142,10 +126,12 @@ void Head::draw_up()
         Map::canvas.replace(head_position, 1, "0"); //Paramters: Position, Size, Content
     }
 }
+
 void Head::draw_down()
 {
     const int height = Map::get_height();
     const int width = Map::get_width();
+
     if (head_position < (height - 2) * width && head_position + width != wall_position)
     {
         Map::canvas.replace(head_position, 1, " "); //Paramters: Position, Size, Content
@@ -154,59 +140,53 @@ void Head::draw_down()
     }
 }
 
-int Head::inform_position()
+void Head::internal_move_up()
 {
-    return this->head_position;
-}
-
-void Head::move_up()
-{
+    this->head_last_position = head_position;
     this->wall_position = detect_wall(MOVE_UP);
     this->tail_position = detect_tail(MOVE_UP);
     draw_up();
     this->wall_shock = detect_shock(MOVE_UP);
 }
 
-void Head::move_left()
+void Head::internal_move_left()
 {
+    this->head_last_position = head_position;
     this->wall_position = detect_wall(MOVE_LEFT);
     draw_left();
     this->wall_shock = detect_shock(MOVE_LEFT);
 }
 
-void Head::move_right()
+void Head::internal_move_right()
 {
+    this->head_last_position = head_position;
     this->wall_position = detect_wall(MOVE_RIGHT);
     draw_right();
     this->wall_shock = detect_shock(MOVE_RIGHT);
 }
 
-void Head::move_down()
+void Head::internal_move_down()
 {
+    this->head_last_position = head_position;
     this->wall_position = detect_wall(MOVE_DOWN);
     draw_down();
     this->wall_shock = detect_shock(MOVE_DOWN);
 }
 
-void Head::set_last_position()
+int Head::internal_get_last_position()
 {
-    this->head_last_position = this->head_position;
+    return head_last_position;
 }
 
-int Head::get_last_position()
+int Head::internal_get_position()
 {
-    return this->head_last_position;
-}
-int Head::get_position()
-{
-    return this->head_position;
+    return head_position;
 }
 
-
-
-
-
-
+bool Head::internal_hit()
+{
+    return wall_shock;
+}
 
 void Tail::Tail_movenent(int head_last_position)
 {
@@ -249,4 +229,4 @@ void Tail::move(string &map)
     }
 }
 
-Tail::Tail(){}
+Tail::Tail() {}
