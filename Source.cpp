@@ -31,7 +31,7 @@ void gotoxy(short x, short y)
     SetConsoleCursorPosition(output, pos);
 }
 
-string get_file_content(const string path)
+string Map::get_file_content(const string path)
 {
 
     ifstream file("Map.txt"); 
@@ -40,105 +40,63 @@ string get_file_content(const string path)
     return content;
 }
 
-int calculate_map_width(string map)
+int Map::calculate_width()
 {
     return (map.find('\n') + 1);
 }
 
-int calculate_map_height(string map)
+int Map::calculate_height()
 {
-    int map_width = calculate_map_width(map);
-
-    return (map.size() / map_width) + 1;
+    return (map.size() / width) + 1;
 }
 
-int find_head_position(const string map)
+Map::Map()
 {
-    return map.find('0');
+    this->map = get_file_content("Map.txt");
+    this->width = calculate_width();
+    this->height = calculate_height();
 }
 
-int calculate_head_height(int head_position, int map_width)
+void Map::print()
 {
-    return head_position / map_width;
+    gotoxy(0, 0);
+    cout << map << endl;
 }
 
-int draw_left(string &map, int &head_position, int map_width, int wall_position)
+
+
+
+int Head::find_position()
 {
-
-    if (head_position % map_width > 1 && head_position - 1 != wall_position)
-    {
-        map.replace(head_position - 1, 2, "0 "); //Paramters: Position, Size, Content
-        head_position--;
-    }
-
-    return head_position;
+    return this->map.find('0');
 }
-
-int draw_right(string &map, int &head_position, int map_width, int wall_position)
-{
-    if (head_position % map_width < map_width - 3 && head_position + 1 != wall_position) // 3 por causa das duas paredes '#' e do \n
-    {
-        map.replace(head_position, 2, " 0"); //Paramters: Position, Size, Content
-        head_position++;
-    }
-
-    return head_position;
-}
-
-int draw_up(string &map, int &head_position, int map_width, int wall_position)
-{
-    if (head_position / map_width > 1 && head_position - map_width != wall_position)
-    {
-        map.replace(head_position, 1, " "); //Paramters: Position, Size, Content
-        head_position = head_position - map_width;
-        map.replace(head_position, 1, "0"); //Paramters: Position, Size, Content
-    }
-    return head_position;
-}
-int draw_down(string &map, int &head_position, int map_height, int map_width, int wall_position)
-{
-    if (head_position < (map_height - 2) * map_width && head_position + map_width != wall_position)
-    {
-        map.replace(head_position, 1, " "); //Paramters: Position, Size, Content
-        head_position = head_position + map_width;
-        map.replace(head_position, 1, "0"); //Paramters: Position, Size, Content
-    }
-    return head_position;
-}
-
-int detect_wall(string map, int head_position, int map_width, char key_pressed)
+int Head::detect_wall(char key_pressed)
 {
     int wall_position = 0;
-    int head_lock_ahead = calculate_next_head_position(head_position, map_width, key_pressed);
-    if (map.at(head_lock_ahead) == '#')
+    int head_lock_ahead = calculate_next_position(key_pressed);
+    if (this->map.at(head_lock_ahead) == '#')
     {
         wall_position = head_lock_ahead;
     }
     return wall_position;
 }
 
-tuple<int, bool> detect_shock(string map, int head_position, int head_last_position, int &lives, int map_width, char key_pressed, int wall_position)
+tuple<int, bool> Head::detect_shock(int &lives, char key_pressed)
 {
     bool head_hit_wall = false;
-    int head_lock_ahead = calculate_next_head_position(head_position, map_width, key_pressed);
-    if (map.at(head_lock_ahead) == 'o')
+    int head_lock_ahead = calculate_next_position(key_pressed);
+    if (this->map.at(head_lock_ahead) == 'o')
     {
         head_hit_wall = false;
         lives--;
     }
-    else if (head_position == head_last_position)
+    else if (this->head_position == this->head_last_position)
     {
         head_hit_wall = true;
         lives--;
     }
-    /* else if (map.at(head_lock_ahead) == '#')
-    {
-        aux = head_lock_ahead;
-        //head_hit_wall = true;
-        //lives--;
-    }*/
 
-    if (head_position == wall_position)
+    if (this->head_position == this->wall_position)
     {
         head_hit_wall = true;
         lives--;
@@ -147,7 +105,7 @@ tuple<int, bool> detect_shock(string map, int head_position, int head_last_posit
     return make_tuple(lives, head_hit_wall);
 }
 
-int calculate_next_head_position(int head_position, int map_width, char key_pressed)
+int Head::calculate_next_position(char key_pressed)
 {
 
     int head_next_position;
@@ -155,16 +113,16 @@ int calculate_next_head_position(int head_position, int map_width, char key_pres
     switch (key_pressed)
     {
     case 'W':
-        head_next_position = head_position - map_width;
+        head_next_position = this->head_position - this->width;
         break;
     case 'A':
-        head_next_position = head_position - 1;
+        head_next_position = this->head_position - 1;
         break;
     case 'S':
-        head_next_position = head_position + map_width;
+        head_next_position = this->head_position + this->width;
         break;
     case 'D':
-        head_next_position = head_position + 1;
+        head_next_position = this->head_position + 1;
         break;
 
     default:
@@ -173,6 +131,55 @@ int calculate_next_head_position(int head_position, int map_width, char key_pres
 
     return head_next_position;
 }
+
+Head::Head()
+{
+    this->head_position = find_position();
+    this->wall_shock = false;
+}
+
+void Head::draw_left(string &map)
+{
+    if (this->head_position % this->width > 1 && this->head_position - 1 != this->wall_position)
+    {
+        map.replace(this->head_position - 1, 2, "0 "); //Paramters: Position, Size, Content
+        this->head_position--;
+    }
+}
+
+void Head::draw_right(string &map)
+{
+    if (this->head_position % this->width < this->width - 3 && this->head_position + 1 != this->wall_position) // 3 por causa das duas paredes '#' e do \n
+    {
+        map.replace(this->head_position, 2, " 0"); //Paramters: Position, Size, Content
+        this->head_position++;
+    }
+}
+
+void Head::draw_up(string &map)
+{
+    if (this->head_position / this->width > 1 && this->head_position - this->width != this->wall_position)
+    {
+        map.replace(this->head_position, 1, " "); //Paramters: Position, Size, Content
+        this->head_position = this->head_position - this->width;
+        map.replace(this->head_position, 1, "0"); //Paramters: Position, Size, Content
+    }
+}
+void Head::draw_down(string &map)
+{
+    if (this->head_position < (this->height - 2) * this->width && this->head_position + this->width != this->wall_position)
+    {
+        map.replace(this->head_position, 1, " "); //Paramters: Position, Size, Content
+        this->head_position = this->head_position + this->width;
+        map.replace(this->head_position, 1, "0"); //Paramters: Position, Size, Content
+    }
+}
+
+
+int Head::inform_position(){
+    return this->head_position;
+}
+
 
 int draw_fruit_position(string &map)
 {
@@ -188,50 +195,46 @@ int draw_fruit_position(string &map)
     return fruit_position;
 }
 
-void Tail_movenent(list<int> &tail_list, int head_position)
+
+
+
+
+
+
+
+
+void Tail::Tail_movenent(list<int> &tail_list, int head_last_position)
 {
     if (tail_list.size() == 1)
     {
-        tail_list.push_front(head_position);
+        tail_list.push_front(head_last_position);
     }
     else
     {
-        tail_list.push_front(head_position);
+        tail_list.push_front(head_last_position);
         tail_list.pop_back();
     }
 }
 
-void tail_increase_size(list<int> &tail_list, int head_position)
+void Tail::tail_increase_size(list<int> &tail_list, int head_position)
 {
     tail_list.push_front(head_position);
 }
 
-void draw_snake_tail(string &map, list<int> tail)
+void Tail::draw_snake_tail(string &map, list<int> tail_list)
 {
-    if (tail.size() == 1)
-        map.replace(tail.front(), 1, "o");
+    if (tail_list.size() == 1)
+        map.replace(tail_list.front(), 1, "o");
     else
     {
-        for (int node : tail)
+        for (int node : tail_list)
         {
             map.replace(node, 1, "o"); //Paramters: Position, Size, Content
         }
-        map.replace(tail.back(), 1, " ");
+        map.replace(tail_list.back(), 1, " ");
     }
 }
 
-void display_list(list<int> l)
-{
-    for (int x : l)
-        cout << x << " ";
-    cout << endl;
-}
-
-void print(string txt)
-{
-    gotoxy(0, 0);
-    cout << txt << endl;
-}
 
 void print_score(int map_height, int score, int lives)
 {
@@ -239,51 +242,4 @@ void print_score(int map_height, int score, int lives)
     cout << "Score: " << score << endl;
     gotoxy(1, map_height + 3);
     cout << "Lives: " << lives << endl;
-}
-
-void print_information(int map_height, int map_width, int lives, int score, float timer)
-{
-    timer = timer / 1000.0;
-
-    for (int i = 0; i < 3; i++)
-    {
-        gotoxy(1, map_height + i);
-        for (int j = 1; j < map_width - 1; j++)
-        {
-            if (i != 0 && i != 1)
-            {
-                printf("#");
-            }
-            else
-            {
-                gotoxy(1, map_height + i);
-                printf("#");
-                gotoxy(map_width - 2, map_height + i);
-                printf("#");
-            }
-        }
-        printf("\n");
-    }
-
-    gotoxy(4, map_height);
-    printf("LIVES");
-    gotoxy(6, map_height + 1);
-    printf("%d", lives);
-
-    gotoxy(24, map_height);
-    printf("SCORE");
-
-    if (score < 100)
-        gotoxy(26, map_height + 1);
-    else
-        gotoxy(27, map_height + 1);
-    printf("%d", score);
-
-    gotoxy(map_width - 8, map_height);
-    printf("TIME");
-    gotoxy(map_width - 8, map_height + 1);
-    if (timer < 100.0)
-        printf("%0.1f", timer);
-    else
-        printf("%0.0f", timer);
 }
