@@ -97,9 +97,6 @@ private:
 class Snake
 {
 public:
-    void mtr(int v);
-    /*Head head;
-    Tail tail;*/
 };
 
 class Head
@@ -127,6 +124,7 @@ public:
     static bool hit() { return get_instance().internal_hit(); }
 
 private:
+    Head();
     void internal_move_up();
     void internal_move_left();
     void internal_move_right();
@@ -134,8 +132,6 @@ private:
     int internal_get_last_position();
     int internal_get_position();
     bool internal_hit();
-
-    Head();
     int find_position();
     bool detect_shock(char key_pressed);
     int calculate_next_position(char key_pressed);
@@ -146,51 +142,33 @@ private:
     void draw_up();
     void draw_down();
 };
-/*
-class Head
-{
-private:
-    int head_position;
-    int head_last_position;
-    int wall_position;
-    int tail_position;
 
-private:
-    int find_position();
-    bool detect_shock(char key_pressed);
-    int calculate_next_position(char key_pressed);
-    int detect_wall(char key_pressed);
-    int detect_tail(char key_pressed);
-    void draw_left();
-    void draw_right();
-    void draw_up();
-    void draw_down();
-
-public:
-    bool wall_shock;
-    Head();
-    void set_last_position();
-    int inform_position();
-    void move_up();
-    void move_left();
-    void move_right();
-    void move_down();
-    int get_last_position();
-    int get_position();
-    bool hit();
-};
-*/
-
-class Tail /*: public Head*/
+class Tail
 {
 public:
     list<int> tail_list;
-    Tail();
-    void Tail_movenent(int head_last_position);
-    void tail_increase_size(int head_position);
-    void draw_snake_tail(string &map);
-    void move(string &map);
+
+public:
+    Tail(const Tail &) = delete;
+    static Tail &get_instance()
+    {
+        static Tail instance;
+        return instance;
+    }
+
+    static auto update_position() { return get_instance().internal_update_position(); }
+    static auto increase_size() { return get_instance().internal_increase_size(); }
+    static auto draw() { return get_instance().internal_draw(); };
+    static auto move() { return get_instance().internal_move(); };
+
+private:
+    Tail() {}
+    void internal_update_position();
+    void internal_increase_size();
+    void internal_draw();
+    void internal_move();
 };
+
 
 class Fruit
 {
