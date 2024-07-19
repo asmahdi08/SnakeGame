@@ -7,6 +7,8 @@
 #include <time.h>
 #include <list>
 #include <thread>
+//#include <graphics.h>
+
 
 #define FRUIT '*'
 #define WALL '#'
@@ -60,36 +62,45 @@ public:
     //private:
 };
 
+class Snake{
+    public:
+    /*Head head;
+    Tail tail;*/
+    
+};
+
 class Head : public Map
 {
 private:
     int head_position;
     int head_last_position;
     int wall_position;
+    int tail_position;
+    bool wall_shock;
+
 
 private:
     int find_position();
     bool detect_shock(char key_pressed);
     int calculate_next_position(char key_pressed);
     int detect_wall(char key_pressed);
-    void draw_left(string &map);
-    void draw_right(string &map);
-    void draw_up(string &map);
-    void draw_down(string &map);
-
-public:
-    bool wall_shock;
+    int detect_tail(char key_pressed);
+    void draw_left(string *map);
+    void draw_right(string *map);
+    void draw_up(string *map);
+    void draw_down(string *map);
 
 public:
     Head();
     void set_last_position();
     int inform_position();
-    void move_up(string &map);
-    void move_left(string &map);
-    void move_right(string &map);
-    void move_down(string &map);
+    void move_up(string *map);
+    void move_left(string *map);
+    void move_right(string *map);
+    void move_down(string *map);
     int get_last_position();
     int get_position();
+    bool hit();
 };
 
 class Tail : public Head
