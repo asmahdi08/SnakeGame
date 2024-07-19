@@ -21,7 +21,6 @@ void System::show_consol_cursor(bool showFlag)
 
 string System::get_file_content(const string path)
 {
-
     ifstream file("Map.txt");
     string content((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
 
@@ -33,6 +32,10 @@ int System::generate_ramdom_number()
     auto seed = chrono::high_resolution_clock::now().time_since_epoch().count();
     mt19937 mt_rand(seed);
     return mt_rand();
+}
+
+Timer::Timer(){
+    this->clock = 0;
 }
 
 void Timer::start()
@@ -57,6 +60,17 @@ double Timer::elapsedMilliseconds()
         endTime = m_EndTime;
 
     return std::chrono::duration_cast<std::chrono::milliseconds>(endTime - m_StartTime).count();
+}
+
+void Timer::update()
+{
+    stop();
+    clock = clock + elapsedMilliseconds();
+}
+
+void Timer::print()
+{
+    printf("%0.1f\n", clock / 1000.0);
 }
 
 void gotoxy(short x, short y)
