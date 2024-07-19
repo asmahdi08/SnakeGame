@@ -196,10 +196,19 @@ void Head::move_down(string &map)
     this->wall_shock = detect_shock(MOVE_DOWN);
 }
 
-void Head::get_last_position(){
+void Head::set_last_position()
+{
     this->head_last_position = this->head_position;
 }
 
+int Head::get_last_position()
+{
+    return this->head_last_position;
+}
+int Head::get_position()
+{
+    return this->head_position;
+}
 
 int draw_fruit_position(string &map)
 {
@@ -215,7 +224,7 @@ int draw_fruit_position(string &map)
     return fruit_position;
 }
 
-void Tail::Tail_movenent( int head_last_position)
+void Tail::Tail_movenent(int head_last_position)
 {
     if (this->tail_list.size() == 1)
     {
@@ -228,9 +237,9 @@ void Tail::Tail_movenent( int head_last_position)
     }
 }
 
-void Tail::tail_increase_size(int head_position)
+void Tail::tail_increase_size(int head_last_position)
 {
-    this->tail_list.push_front(head_position);
+    this->tail_list.push_front(head_last_position);
 }
 
 void Tail::draw_snake_tail(string &map)
@@ -251,7 +260,7 @@ void Tail::move(string &map)
 {
     if (this->tail_list.size() > 0)
     {
-        this->draw_snake_tail(map);
+        draw_snake_tail(map);
         map.replace(this->tail_list.back(), 1, " ");
     }
 }
