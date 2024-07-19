@@ -34,7 +34,7 @@ void gotoxy(short x, short y)
 string Map::get_file_content(const string path)
 {
 
-    ifstream file("Map.txt"); 
+    ifstream file("Map.txt");
     string content((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
 
     return content;
@@ -210,20 +210,6 @@ int Head::get_position()
     return this->head_position;
 }
 
-int draw_fruit_position(string &map)
-{
-    auto seed = chrono::high_resolution_clock::now().time_since_epoch().count();
-    mt19937 mt_rand(seed);
-    int fruit_position = mt_rand() % map.length();
-
-    while (map.at(fruit_position) != ' ')
-        fruit_position = mt_rand() % map.length();
-
-    map.replace(fruit_position, 1, "*"); //Paramters: Position, Size, Content
-
-    return fruit_position;
-}
-
 void Tail::Tail_movenent(int head_last_position)
 {
     if (this->tail_list.size() == 1)
@@ -272,3 +258,31 @@ void print_score(int map_height, int score, int lives)
     gotoxy(1, map_height + 3);
     cout << "Lives: " << lives << endl;
 }
+
+
+Fruit::Fruit(){
+    this->fruit_position = find_position();
+}
+
+int Fruit::find_position(){
+    return this->map.find('*');
+}
+ int Fruit::get_position(){
+     return this->fruit_position;
+ }
+
+
+void Fruit::draw(string &map)
+{
+    auto seed = chrono::high_resolution_clock::now().time_since_epoch().count();
+    mt19937 mt_rand(seed);
+    int fruit_position = mt_rand() % map.length();
+
+    while (map.at(fruit_position) != ' ')
+        fruit_position = mt_rand() % map.length();
+
+    map.replace(fruit_position, 1, "*"); //Paramters: Position, Size, Content
+
+    this->fruit_position = fruit_position;
+}
+
