@@ -66,7 +66,7 @@ void gotoxy(short x, short y)
     SetConsoleCursorPosition(output, pos);
 }
 
-string Map::canvas /*{" "}*/;
+string Map::canvas;
 Map::Map() : width(calculate_width()), height(calculate_height()) {}
 int Map::calculate_width() { return (canvas.find('\n') + 1); }
 int Map::calculate_height() { return (canvas.size() / width) + 1; }
@@ -95,7 +95,6 @@ Fruit::Fruit()
 
 int Fruit::find_position()
 {
-    //string canvas = "*";
     int fruit_position = Map::canvas.find('*');
 
     if (Map::canvas.find('*') == string::npos)
@@ -112,9 +111,10 @@ int Fruit::find_position()
 
     return fruit_position;
 }
+
 int Fruit::get_position()
 {
-    return this->fruit_position;
+    return fruit_position;
 }
 
 void Fruit::draw(string &map)
