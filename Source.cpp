@@ -1,4 +1,4 @@
-#include "header.h#include "header.h"
+#include "header.h"
 
 System::System(/* args */)
 {
@@ -224,7 +224,7 @@ int Fruit::set_x()
 int Fruit::set_y()
 {
     //2 : upper and lower wall
-    return (fruit_position / Map::get_width());
+    return fruit_position / Map::get_width();
 }
 
 tuple<int, int> Fruit::get_coord()
