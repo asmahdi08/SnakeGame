@@ -24,7 +24,7 @@ int main()
     Fruit fruit;
     int lives = 1;
     int score = 0;
-    int difficulty = 100;
+    int difficulty = 130;
     char key_pressed = MOVE_UP;
 
     System::show_consol_cursor();
@@ -40,19 +40,19 @@ int main()
 
     while (!(GetAsyncKeyState('Q')) && lives > 0)
     {
-        Sleep(difficulty);
         timer.start();
+        Sleep(difficulty);
 
         if (_kbhit())
             key_pressed = toupper(_getch());
         Head::move(key_pressed);
-        
+
         if (Head::get_colision())
             lives--;
         else
             Head::print();
             Tail::move();
-    
+
         if (Head::get_coord() == fruit.get_coord())
         {
             Tail::increase_size();
@@ -68,5 +68,7 @@ int main()
     }
     system("cls");
     cout << s_AllocCount << " allocations\n";
+    print_colour_scheme();
     return 0;
 }
+
