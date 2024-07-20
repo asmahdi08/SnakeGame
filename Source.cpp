@@ -21,6 +21,7 @@ void System::show_consol_cursor(bool showFlag)
 
 string System::get_file_content(const string path)
 {
+
     ifstream file("Map.txt");
     string content((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
 
@@ -34,7 +35,8 @@ int System::generate_ramdom_number()
     return mt_rand();
 }
 
-Timer::Timer(){
+Timer::Timer()
+{
     this->clock = 0;
 }
 
@@ -62,15 +64,17 @@ double Timer::elapsedMilliseconds()
     return std::chrono::duration_cast<std::chrono::milliseconds>(endTime - m_StartTime).count();
 }
 
-void Timer::update()
+Timer Timer::update()
 {
     stop();
     clock = clock + elapsedMilliseconds();
+    return *this;
 }
 
-void Timer::print()
+Timer Timer::print()
 {
     printf("%0.1f\n", clock / 1000.0);
+    return *this;
 }
 
 void gotoxy(short x, short y)
@@ -89,9 +93,22 @@ int Map::internal_get_height() { return height; }
 
 void Map::internal_print()
 {
+    const int n = Map::canvas.length() + 1;
+    char *map = (char *)malloc(n * sizeof(char));
+    Map::canvas.copy(map, n);
 
     gotoxy(0, 0);
-    cout << Map::canvas << "\n";
+    for (int i = 0; i < n; i++)
+    {
+        if (map[i] == '#')
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),120);
+        else if (map[i] == '0'||map[i] == 'o')
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 114);
+        else if (map[i] == '*')
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 126|FOREGROUND_INTENSITY );
+
+        printf("%c", map[i]);
+    }
 }
 
 void print_score(int map_height, int score, int lives)

@@ -7,6 +7,8 @@
 #include <list>
 #include <thread>
 
+#include<stdlib.h>
+
 #define FRUIT '*'
 #define WALL '#'
 #define MOVE_UP 'W'
@@ -28,6 +30,10 @@ struct System
     ~System();
 };
 
+
+
+
+
 class Timer
 {
 private:
@@ -43,8 +49,8 @@ private:
 
 public:
     void start();
-    void update();
-    void print();
+    Timer update();
+    Timer print();
     Timer();
 };
 
