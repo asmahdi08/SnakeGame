@@ -1,17 +1,10 @@
 #include "header.h"
 
-System::System(/* args */)
-{
-}
 
-System::~System()
-{
-}
-
-void System::show_consol_cursor(bool showFlag)
+void System::internal_hide_consol_cursor()
 {
     HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
-
+    bool showFlag = false;
     CONSOLE_CURSOR_INFO cursorInfo;
 
     GetConsoleCursorInfo(out, &cursorInfo);
@@ -19,7 +12,7 @@ void System::show_consol_cursor(bool showFlag)
     SetConsoleCursorInfo(out, &cursorInfo);
 }
 
-string System::get_file_content(const string path)
+string System::internal_get_file_content(const string path)
 {
 
     ifstream file("Map.txt");
@@ -28,11 +21,53 @@ string System::get_file_content(const string path)
     return content;
 }
 
-int System::generate_ramdom_number()
+int System::internal_generate_ramdom_number()
 {
     auto seed = chrono::high_resolution_clock::now().time_since_epoch().count();
     mt19937 mt_rand(seed);
     return mt_rand();
+}
+
+int System::internal_set_x(int one_dimension_position)
+{
+    return one_dimension_position % Map::get_width();
+}
+
+void System::internal_gotoxy(short x, short y)
+{
+    COORD pos = {x, y};
+    HANDLE output = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleCursorPosition(output, pos);
+}
+
+void System::internal_go_to_console_position(int one_dimension_position){
+    System::gotoxy(one_dimension_position % Map::get_width(), one_dimension_position / Map::get_width());
+}
+
+COORD System::internal_getxy(CONSOLE_SCREEN_BUFFER_INFO *csbi)
+{
+    COORD coord = csbi->dwCursorPosition;
+    return coord;
+}
+
+char System::internal_get_cursor_char()
+{
+    char c = '\0';
+
+    CONSOLE_SCREEN_BUFFER_INFO con;
+    HANDLE hcon = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hcon != INVALID_HANDLE_VALUE && GetConsoleScreenBufferInfo(hcon, &con))
+    {
+        DWORD read = 0;
+        if (!ReadConsoleOutputCharacterA(hcon, &c, 1, con.dwCursorPosition, &read) || read != 1)
+            c = '\0';
+    }
+    return c;
+}
+
+int System::internal_set_y(int one_dimension_position)
+{
+    return one_dimension_position / Map::get_width();
 }
 
 Timer::Timer()
@@ -77,33 +112,6 @@ Timer Timer::print()
     return *this;
 }
 
-void gotoxy(short x, short y)
-{
-    COORD pos = {x, y};
-    HANDLE output = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleCursorPosition(output, pos);
-}
-
-COORD getxy(CONSOLE_SCREEN_BUFFER_INFO *csbi)
-{
-    COORD coord = csbi->dwCursorPosition;
-    return coord;
-}
-
-char get_cursor_char()
-{
-    char c = '\0';
-
-    CONSOLE_SCREEN_BUFFER_INFO con;
-    HANDLE hcon = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (hcon != INVALID_HANDLE_VALUE && GetConsoleScreenBufferInfo(hcon, &con))
-    {
-        DWORD read = 0;
-        if (!ReadConsoleOutputCharacterA(hcon, &c, 1, con.dwCursorPosition, &read) || read != 1)
-            c = '\0';
-    }
-    return c;
-}
 
 string Map::canvas;
 Map::Map() : width(calculate_width()), height(calculate_height()) {}
@@ -114,63 +122,32 @@ int Map::internal_get_height() { return height; }
 
 void Map::internal_print()
 {
-    gotoxy(0, 0);
+    System::gotoxy(0, 0);
     
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 120);
     cout << Map::canvas << '\n';
     
     //cout<<"\033[3;100;30m"<< Map::canvas<<"\033[0m\n";
-    /*
-    const int n = Map::canvas.length() + 1;
-    char *map = (char *)malloc(n * sizeof(char));
-    Map::canvas.copy(map, n);
-
-    gotoxy(0, 0);
-    for (int i = 0; i < n; i++)
-    {
-        if (map[i] == '#')
-            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 120);
-        else if (map[i] == '0' || map[i] == 'o')
-            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 114);
-        else if (map[i] == '*')
-            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 126 | FOREGROUND_INTENSITY);
-
-        printf("%c", map[i]);
-    }
-    */
 }
 
 void print_score(int map_height, int score, int lives)
 {
-    gotoxy(1, map_height + 2);
+    System::gotoxy(1, map_height + 2);
     cout << "Score: " << score << endl;
-    gotoxy(1, map_height + 3);
+    System::gotoxy(1, map_height + 3);
     cout << "Lives: " << lives << endl;
 }
 
 Fruit::Fruit()
 {
     this->fruit_position = find_position();
-    this->x = set_x();
-    this->y = set_y();
+    this->x = System::set_x(fruit_position);
+    this->y = System::set_y(fruit_position);
 }
 
 int Fruit::find_position()
 {
     int fruit_position = Map::canvas.find(FRUIT);
-
-    /*if (Map::canvas.find('*') == string::npos)
-    {
-        System sys;
-
-        fruit_position = sys.generate_ramdom_number() % Map::canvas.length();
-
-        while (Map::canvas.at(fruit_position) != ' ')
-            fruit_position = sys.generate_ramdom_number() % Map::canvas.length();
-
-        Map::canvas.replace(fruit_position, 1, "*"); //Paramters: Position, Size, Content
-    }*/
-
     return fruit_position;
 }
 
@@ -179,30 +156,15 @@ int Fruit::get_position()
     return fruit_position;
 }
 
-void Fruit::draw(string &map)
-{
-    System sys;
-
-    int fruit_position = sys.generate_ramdom_number() % map.length();
-
-    while (map.at(fruit_position) != ' ')
-        fruit_position = sys.generate_ramdom_number() % map.length();
-
-    map.replace(fruit_position, 1, "*"); //Paramters: Position, Size, Content
-
-    this->fruit_position = fruit_position;
-}
-
 void Fruit::generate_position()
 {
-    System sys;
     int new_fruit_position;
     int fruit_x_position;
     int fruit_y_position;
 
     do
     {
-        new_fruit_position = sys.generate_ramdom_number() % Map::canvas.length();
+        new_fruit_position = System::generate_ramdom_number() % Map::canvas.length();
     } while (Map::canvas.at(new_fruit_position) != ' ');
 
     this->x = new_fruit_position % Map::get_width();
@@ -211,20 +173,9 @@ void Fruit::generate_position()
 
 void Fruit::draw()
 {
-    gotoxy(x, y);
+    System::gotoxy(x, y);
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 126 | FOREGROUND_INTENSITY);
     cout << FRUIT;
-}
-
-int Fruit::set_x()
-{
-    return fruit_position % Map::get_width();
-}
-
-int Fruit::set_y()
-{
-    //2 : upper and lower wall
-    return fruit_position / Map::get_width();
 }
 
 tuple<int, int> Fruit::get_coord()

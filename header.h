@@ -23,13 +23,38 @@
 
 using namespace std;
 
-struct System
+class System
 {
-    System(/* args */);
-    int generate_ramdom_number();
-    string get_file_content(const string path);
-    void show_consol_cursor(bool showFlag);
-    ~System();
+public:
+    System(const System &) = delete;
+    static System &get_instance()
+    {
+        static System instance;
+        return instance;
+    }
+
+    static int generate_ramdom_number() { return get_instance().internal_generate_ramdom_number(); }
+    static auto show_consol_cursor() { return get_instance().internal_hide_consol_cursor(); }
+    static string get_file_content(const string path) { return get_instance().internal_get_file_content(path); }
+    static int set_x(int one_dimension_position) { return get_instance().internal_set_x(one_dimension_position); }
+    static int set_y(int one_dimension_position) { return get_instance().internal_set_y(one_dimension_position); }
+    static void gotoxy(short x, short y){ return get_instance().internal_gotoxy(x,y); }
+    static void go_to_console_position(int one_dimension_position){ return get_instance().internal_go_to_console_position(one_dimension_position); }
+    static COORD getxy(CONSOLE_SCREEN_BUFFER_INFO *csbi){ return get_instance().internal_getxy(csbi); }
+    static char get_cursor_char(){ return get_instance().internal_get_cursor_char(); }
+
+private:
+    System() {}
+    int internal_generate_ramdom_number();
+    void internal_hide_consol_cursor();
+    string internal_get_file_content(const string path);
+    int internal_set_y(int one_dimension_position);
+    int internal_set_x(int one_dimension_position);
+
+    void internal_gotoxy(short x, short y);
+    void internal_go_to_console_position(int one_dimension_position);
+    COORD internal_getxy(CONSOLE_SCREEN_BUFFER_INFO *csbi);
+    char internal_get_cursor_char();
 };
 
 class Timer
@@ -50,27 +75,6 @@ public:
     Timer print();
     Timer();
 };
-
-/*
-///Singleton
-class Ramdom
-{
-public:
-    Ramdom(const Ramdom &) = delete;
-    static Ramdom &get_instance()
-    {
-        static Ramdom instance;
-        return instance;
-    }
-
-    static float Float() { return get_instance().IFloat(); }
-
-private:
-    Ramdom() {}
-    float IFloat() { return m_q; }
-    float m_q = 2.0;
-};
-*/
 
 class Map
 {
@@ -96,7 +100,6 @@ public:
 private:
     Map();
     int internal_get_width();
-
     int internal_get_height();
     int calculate_width();
     int calculate_height();
@@ -111,12 +114,10 @@ public:
 class Head
 {
 private:
-    static int x;
-    static int y;
+    int x;
+    int y;
     int head_position;
     int head_last_position;
-    int wall_position;
-    int tail_position;
     bool wall_shock;
     bool tail_shock;
 
@@ -130,45 +131,44 @@ public:
 
     static int get_last_position() { return get_instance().internal_get_last_position(); }
     static int get_position() { return get_instance().internal_get_position(); }
-    static bool hit() { return get_instance().internal_hit(); }
     static bool get_colision() { return get_instance().internal_get_colision(); }
     static auto print() { return get_instance().internal_print(); }
     static auto move(char key_pressed) { return get_instance().internal_move(key_pressed); }
     static auto set_coord() { return get_instance().internal_set_coord(); }
     static auto get_coord() { return get_instance().internal_get_coord(); }
-    static auto print_coord() { return get_instance().internal_print_coord(); }
 
+    /*
+    static auto print_coord() { return get_instance().internal_print_coord(); }
     static int get_x() { return get_instance().internal_get_x(); }
     static int get_y() { return get_instance().internal_get_y(); }
+    */
 
 private:
     Head();
-    int internal_get_last_position();
-    int internal_get_position();
-    bool internal_hit();
-    int find_position();
-    bool detect_shock(char key_pressed);
-    int calculate_next_position(char key_pressed);
-    int detect_wall(char key_pressed);
-    int detect_tail(char key_pressed);
-    void calculate_next_coord(char key_pressed);
-    bool detect_wall_colision();
-    bool detect_tail_colision();
-    bool internal_get_colision();
     void internal_print();
     void internal_move(char key_pressed);
     void internal_set_coord();
+    int internal_get_last_position();
+    int internal_get_position();
+    bool internal_get_colision();
     tuple<int, int> internal_get_coord();
+
+    void calculate_next_coord(char key_pressed);
+    int convert_coord_to_one_dimendion();
+    int find_position();
+    bool detect_wall_colision();
+    bool detect_tail_colision();
+
+    /*
     int internal_get_x() { return x; }
     int internal_get_y() { return y; }
-    int convert_coord_to_one_dimendion();
-
     void internal_print_coord() { cout << "H_x:" << x << "H_y: " << y << '\n'; }
+    */
 };
 
 class Tail
 {
-public:
+private:
     list<int> tail_list;
 
 public:
@@ -178,15 +178,13 @@ public:
         static Tail instance;
         return instance;
     }
-
-    static auto update_position() { return get_instance().internal_update_position(); }
     static auto increase_size() { return get_instance().internal_increase_size(); }
     static auto draw() { return get_instance().internal_draw(); }
     static auto move() { return get_instance().internal_move(); }
 
 private:
     Tail() {}
-    void internal_update_position();
+    void update_position();
     void internal_increase_size();
     void internal_draw();
     void internal_move();
@@ -206,20 +204,12 @@ public:
     Fruit();
     void generate();
     int get_position();
-    void draw(string &map);
     tuple<int, int> get_coord();
     void draw();
     //void print_coord() { cout << "F_x:" << x << "f_y: " << y << '\n' << "f_p: " << fruit_position << '\n'; }
 
 private:
-    int set_y();
-    int set_x();
     void generate_position();
 };
 
 void print_score(int map_height, int score, int lives);
-void gotoxy(short x, short y);
-COORD getxy(CONSOLE_SCREEN_BUFFER_INFO *csbi);
-char get_cursor_char();
-int set_y();
-int set_x();
