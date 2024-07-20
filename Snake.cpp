@@ -1,4 +1,4 @@
-#include "header.h"
+#include "Header.hpp"
 
 Head::Head()
 {
@@ -78,11 +78,10 @@ void Head::internal_set_coord()
 
 void Head::internal_print()
 {
+    
     System::gotoxy(x, y);
-
-    //SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 114);
     cout << GREEN_CHAR << HEAD << RESET_COLOR_SCHEME;
-    //cout << HEAD;
+    
 }
 
 void Head::internal_move(char key_pressed)
@@ -131,17 +130,12 @@ void Tail::internal_increase_size()
 void Tail::internal_draw()
 {
     const int map_width = Map::get_width();
-    //SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 114);
 
     if (this->tail_list.size() == 1)
     {
         System::go_to_console_position(tail_list.front());
         cout << GREEN_CHAR << TAIL_NODE << RESET_COLOR_SCHEME;
-        
-        //cout << TAIL_NODE;
         System::go_to_console_position(tail_list.back());
-        //cout << ' ';
-        ///cout << ' ' <<RESET_COLOR_SCHEME;
         cout << ' ';
     }
     else

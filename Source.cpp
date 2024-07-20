@@ -1,5 +1,4 @@
-#include "header.h"
-
+#include "Header.hpp"
 
 void System::internal_hide_consol_cursor()
 {
@@ -40,7 +39,8 @@ void System::internal_gotoxy(short x, short y)
     SetConsoleCursorPosition(output, pos);
 }
 
-void System::internal_go_to_console_position(int one_dimension_position){
+void System::internal_go_to_console_position(int one_dimension_position)
+{
     System::gotoxy(one_dimension_position % Map::get_width(), one_dimension_position / Map::get_width());
 }
 
@@ -112,7 +112,6 @@ Timer Timer::print()
     return *this;
 }
 
-
 string Map::canvas;
 Map::Map() : width(calculate_width()), height(calculate_height()) {}
 int Map::calculate_width() { return (canvas.find('\n') + 1); }
@@ -123,12 +122,8 @@ int Map::internal_get_height() { return height; }
 void Map::internal_print()
 {
     System::gotoxy(0, 0);
-    
-    //SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 120);
-    //cout <<"\033[40;64m"<< Map::canvas <<"\033[0m"<<'\n';
+
     cout << GRAY_CHAR << Map::canvas << RESET_COLOR_SCHEME;
-    
-    //cout<<"\033[3;100;30m"<< Map::canvas<<"\033[0m\n";
 }
 
 void print_score(int map_height, int score, int lives)
@@ -175,9 +170,7 @@ void Fruit::generate_position()
 void Fruit::draw()
 {
     System::gotoxy(x, y);
-    //SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 126 | FOREGROUND_INTENSITY);
     cout << YELLOW_CHAR << FRUIT << RESET_COLOR_SCHEME;
-    
 }
 
 tuple<int, int> Fruit::get_coord()
@@ -190,6 +183,9 @@ void Fruit::generate()
     generate_position();
     draw();
 }
+
+
+
 
 
 
@@ -209,6 +205,30 @@ void print_colour_scheme()
         }
         printf("\n");
     }
+}
 
+void set_console_size()
+{
 
+    char str[11];
+    sprintf(str, "MODE %d, %d", Map::get_width(), Map::get_height() + 5);
+    system(str);
+}
+
+void test_sound()
+{
+    int f, t;
+    while (!GetAsyncKeyState('Q'))
+    {
+        if (GetAsyncKeyState('V'))
+        {
+            fflush(stdin);
+            cin >> f;
+        }
+        if (GetAsyncKeyState('P'))
+            Beep(f, 100);
+    }
+    //532Hz, 500ms
+    //cout << s_AllocCount << " allocations\n";
+    //220Hz good for menu
 }
