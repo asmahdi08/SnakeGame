@@ -14,7 +14,7 @@ void System::internal_hide_consol_cursor()
 string System::internal_get_file_content(const string path)
 {
 
-    ifstream file("Map.txt");
+    ifstream file("Map.txt");:
     string content((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
 
     return content;
@@ -134,62 +134,6 @@ void print_score(int map_height, int score, int lives)
     cout << "Lives: " << lives << endl;
 }
 
-Fruit::Fruit()
-{
-    this->fruit_position = find_position();
-    this->x = System::set_x(fruit_position);
-    this->y = System::set_y(fruit_position);
-}
-
-int Fruit::find_position()
-{
-    int fruit_position = Map::canvas.find(FRUIT);
-    return fruit_position;
-}
-
-int Fruit::get_position()
-{
-    return fruit_position;
-}
-
-void Fruit::generate_position()
-{
-    int new_fruit_position;
-    int fruit_x_position;
-    int fruit_y_position;
-
-    do
-    {
-        new_fruit_position = System::generate_ramdom_number() % Map::canvas.length();
-    } while (Map::canvas.at(new_fruit_position) != ' ');
-
-    this->x = new_fruit_position % Map::get_width();
-    this->y = new_fruit_position / Map::get_width();
-}
-
-void Fruit::draw()
-{
-    System::gotoxy(x, y);
-    cout << YELLOW_CHAR << FRUIT << RESET_COLOR_SCHEME;
-}
-
-tuple<int, int> Fruit::get_coord()
-{
-    return tie(x, y);
-}
-
-void Fruit::generate()
-{
-    generate_position();
-    draw();
-}
-
-
-
-
-
-
-
 void print_colour_scheme()
 {
     int i, j, n;
@@ -231,4 +175,187 @@ void test_sound()
     //532Hz, 500ms
     //cout << s_AllocCount << " allocations\n";
     //220Hz good for menu
+}
+
+void print_information(int lives, int score, Timer &timer)
+{
+
+    const int map_height = Map::get_height();
+    const int map_width = Map::get_width();
+    for (int i = 0; i < 3; i++)
+    {
+        System::gotoxy(0, map_height + i);
+        for (int j = 0; j < map_width - 1; j++)
+        {
+            if (i != 0 && i != 1)
+            {
+                cout << GRAY_CHAR << '#' << RESET_COLOR_SCHEME;
+            }
+            else
+            {
+                System::gotoxy(0, map_height + i);
+                cout << GRAY_CHAR << "##" << RESET_COLOR_SCHEME;
+                System::gotoxy(map_width - 3, map_height + i);
+                cout << GRAY_CHAR << "##" << RESET_COLOR_SCHEME;
+            }
+        }
+        printf("\n");
+    }
+
+    System::gotoxy(4, map_height);
+    printf("LIVES");
+    System::gotoxy(6, map_height + 1);
+    printf("%d", lives);
+
+    System::gotoxy(24, map_height);
+    printf("SCORE");
+
+    if (score < 100)
+        System::gotoxy(26, map_height + 1);
+    else
+        System::gotoxy(26 - (calculate_digits(score) - 3), map_height + 1);
+
+    printf("%d", score);
+
+    System::gotoxy(map_width - 8, map_height);
+    printf("TIME");
+    System::gotoxy(map_width - 8, map_height + 1);
+    timer.update().print();
+    /*if (timer < 100.0)
+        printf("%0.1f", timer);
+    else
+        printf("%d", int(timer));*/
+}
+
+void show_consol_cursor(bool showFlag)
+{
+    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    CONSOLE_CURSOR_INFO cursorInfo;
+
+    GetConsoleCursorInfo(out, &cursorInfo);
+    cursorInfo.bVisible = showFlag; // set the cursor visibility
+    SetConsoleCursorInfo(out, &cursorInfo);
+}
+
+int calculate_digits(int val)
+{
+    int i = 0;
+    while (val)
+    {
+        val = val / 10;
+        i++;
+    }
+
+    return i;
+}
+
+void System::internal_welcome_screen(char &choice)
+{
+    
+    
+    system("cls");
+    cout << "Snake Game\n";
+    cout << "by Vitor Matias\n\n";
+    cout << "1-New Game\n";
+    cout << "2-Continue\n";
+    cout << "3-Records\n";
+    cout << "4-Quit\n";
+
+    while (!GetAsyncKeyState('Q'))
+    {
+        if (_kbhit())
+        {
+            choice = toupper(_getch());
+            imprimir_selecao_menu(choice);
+        }
+    }
+}
+
+void imprimir_selecao_menu(char &choice)
+{
+    switch (choice)
+    {
+    case '1':
+    {
+        system("cls");
+        cout << "Snake Game\n";
+        cout << "by Vitor Matias\n\n";
+        cout << MENU_SELECTOR << "1-New Game\n"<< RESET_COLOR_SCHEME;
+        cout << "2-Continue\n";
+        cout << "3-Records\n";
+        cout << "4-Quit\n";
+
+        if(_kbhit())
+        break;
+    }
+    case '2':
+    {
+        system("cls");
+        cout << "Snake Game\n";
+        cout << "by Vitor Matias\n\n";
+        cout << "1-New Game\n";
+        cout << MENU_SELECTOR << "2-Continue\n"<< RESET_COLOR_SCHEME;
+        cout << "3-Records\n";
+        cout << "4-Quit\n";
+        break;
+    }
+    case '3':
+    {
+        system("cls");
+        cout << "Snake Game\n";
+        cout << "by Vitor Matias\n\n";
+        cout << "1-New Game\n";
+        cout << "2-Continue\n";
+        cout << MENU_SELECTOR << "3-Records\n"<< RESET_COLOR_SCHEME;
+        cout << "4-Quit\n";
+        break;
+    }
+    case '4':
+    {
+        system("cls");
+        cout << "Snake Game\n";
+        cout << "by Vitor Matias\n\n";
+        cout << "1-New Game\n";
+        cout << "2-Continue\n";
+        cout << "3-Records\n";
+        cout << MENU_SELECTOR << "4-Quit\n"<< RESET_COLOR_SCHEME;
+        break;
+    }
+    case '\n':
+
+    default:
+        break;
+    }
+}
+
+void System::internal_write_file()
+{
+    ofstream myfile("Saves/example.txt");
+
+    
+    if (myfile.is_open())
+    {
+        myfile << Map::canvas;
+        myfile.close();
+    }
+    else
+        cout << "Unable to open file";
+}
+
+int System::internal_convert_coord_to_one_dimendion(const int x, const int y)
+{
+    return y * Map::get_width() + x;
+}
+
+void System::internal_update_map_to_print(int fruit_position){
+    list<int> tail = Tail::get_tail();
+    tail.pop_back();
+
+    Map::canvas.replace(Head::get_position(), 1, "0");
+    for(int node : tail){
+        Map::canvas.replace(node, 1, "o"); 
+    }
+
+    Map::canvas.replace(fruit_position, 1, "*");
 }
