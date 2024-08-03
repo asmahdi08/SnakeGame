@@ -23,6 +23,7 @@ If you wish to compile the code and run it on your computer, you need to use the
 ## Observations
 * This code uses the library ```<Windows.h>```, that only works on Windows platform.
 
+or you could use mingw on other platforms to compile 
 
 
 Arcade 27
