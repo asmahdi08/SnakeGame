@@ -18,7 +18,9 @@ cout << COLOUR_CODE << "Text" << RESET_COLOR_SCHEME;
 
 ## Compilation
 If you wish to compile the code and run it on your computer, you need to use the following terminal command:
-> g++ -std=c++17 -O2 Header.hpp Source.cpp Snake.cpp Main.cpp -o snake_game
+```cmd
+g++ -std=c++17 -O2 Header.hpp Source.cpp Snake.cpp Main.cpp -o snake_game
+```
 
 ## Observations
 * This code uses the library ```<Windows.h>```, that only works on Windows platform.
